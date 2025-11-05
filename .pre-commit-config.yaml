@@ -1,0 +1,81 @@
+---
+repos:
+  # ----- Generic hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+      - id: detect-private-key
+
+  # ----- Secrets (Gitleaks)
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.29.0
+    hooks:
+      - id: gitleaks
+        args: ["--staged", "--redact"]
+
+  # ----- Markdown
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.45.0
+    hooks:
+      - id: markdownlint
+        files: \.(md|mdx)$
+        additional_dependencies: []
+
+  # ----- YAML
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+        files: \.(yml|yaml)$
+        args: ["-c", ".yamllint.yaml"]
+
+  # ----- Prettier (format JS/TS/JSON/YAML/MD)
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        additional_dependencies: ["prettier@3.3.3"]
+        files: \.(js|jsx|ts|tsx|json|yaml|yml|md)$
+
+  # ----- Terraform fmt / validate / tflint / trivy
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.103.0
+    hooks:
+      - id: terraform_fmt
+        files: ^infra/terraform/
+      - id: terraform_validate
+        files: ^infra/terraform/
+      - id: terraform_tflint
+        files: ^infra/terraform/
+        args: ["--args=--recursive"]
+      - id: terraform_trivy # tfsec déprécié côté msg, donc terraform_trivy
+        files: ^infra/terraform/
+
+  # ----- Dockerfile lint
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.14.0
+    hooks:
+      - id: hadolint
+        files: (^|/)(Dockerfile|dockerfile)(\..*)?$
+
+  # ----- Shell scripts
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        files: \.sh$
+
+  # ----- OPTIONAL: pre-push heavy scans (Trivy)
+  # Active ces hooks en pre-push seulement:
+  - repo: local
+    hooks:
+      - id: trivy-fs
+        name: trivy filesystem scan (pre-push)
+        entry: bash -c 'trivy fs --quiet --severity HIGH,CRITICAL .'
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
