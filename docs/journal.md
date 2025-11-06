@@ -4,41 +4,36 @@
 
 ---
 
-## 2025-11-05 — main — (commit: fef42eb)
+## 2025-11-05 — main
 
-### What I did
+### What I did — bootstrap
 
 - Bootstrap repo: pre-commit + linters (gitleaks, markdownlint, yamllint, prettier, tflint, trivy).
 - Added base configs: `.editorconfig`, `.gitattributes`, `.gitignore`, `LICENSE`, `README`.
 - Scaffolds created: `infra/terraform/`, `app/`, `k8s/`, `ops/k6/`, `scripts/`.
 - Added CODEOWNERS + PR template + tflint config.
 
-### Why (impact / ROI / SRE)
+### Why (impact / ROI / SRE) — bootstrap
 
 - Standardized quality gates from day 0 (hire-ready hygiene).
 - Fast feedback via hooks; reduces review time and defects.
 - Prépare l’intégration SRE/DevSecOps (scans et docs SRE à venir).
 
-### Evidence (links)
+---
 
-- Branch: `main`
-- Commit: `fef42eb`
-- PR: _(n/a — first push)_
-- CI: _(à venir quand GitHub Actions seront ajoutées)_
+## 2025-11-06 — docs/sre-foundations
 
-### Next
+### What I did — docs/sre-foundations
 
-- Branch `docs/sre-foundations` → ajouter SRE scaffolds (`docs/sre/*`).
-- Planifier `PoC 1A.1` (backend Terraform) ou pause dev si SRE d’abord.
+- Added SRE foundations: SLO/SLI, error budget, runbook, postmortem template, game day, alert policies.
 
-### SRE notes
+### Why (impact / ROI / SRE) — docs/sre-foundations
 
-- SLO touched? ☑ no (scaffolds à faire)
-- Runbook / postmortem updated? ☐/☐
+- Define reliability targets and incident workflow early; improves clarity for future CI/Observability and interviews.
 
 ---
 
-## YYYY-MM-DD — `<branch>` — (commit: `<short-sha>`) — Template
+## YYYY-MM-DD — `<branch>` — Template
 
 ### What I did (template)
 
@@ -47,17 +42,3 @@
 ### Why (impact / ROI / SRE) — template
 
 - …
-
-### Evidence (links) — template
-
-- PR: [PR link](https://github.com/YOUR_GITHUB_USER/eks-pro/pull/…)
-- CI: [CI run](https://github.com/YOUR_GITHUB_USER/eks-pro/actions/runs/…)
-
-### Next — template
-
-- …
-
-### SRE notes — template
-
-- SLO touched? ☐ yes / ☐ no
-- Runbook / postmortem updated? ☐/☐
