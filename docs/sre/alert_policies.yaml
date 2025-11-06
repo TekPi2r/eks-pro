@@ -1,0 +1,17 @@
+# Alert Policies
+# Short purpose: map SLOs to actionable alerts (thresholds, windows, scope).
+# When to update: when SLOs change or observability stack evolves.
+
+uptime_synthetic:
+  condition: "3_of_5_probes_fail_5m"
+  scope: "service-hours in dev; 24/7 in prod"
+
+latency_p95:
+  threshold_ms: 500
+  window: "5m"
+  scope: "service-hours in dev; 24/7 in prod"
+
+errors_5xx:
+  threshold_rate: 0.01
+  window: "5m"
+  scope: "service-hours in dev; 24/7 in prod"
