@@ -10,6 +10,11 @@ Infrastructure as Code with **Terraform**, CI/CD via **GitHub Actions (OIDC)**, 
 - Security: pre-commit hooks (format, lint, secrets, IaC & Docker checks).
 - Tests: unit/integration + k6 (ops/).
 
+## Status
+
+- PoC 1A (bootstrap-state): ✅ done — S3/KMS/DynamoDB via SSO profile.
+- Dev journal: see `docs/journal.md`.
+
 ## Quick start
 
 ```bash
