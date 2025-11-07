@@ -106,8 +106,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "tfstate" {
 }
 
 # S3 — Dedicated logs bucket (for server access logs)
-# tfsec/trivy ignore: logging this sink bucket would require ACLs, conflicting with BucketOwnerEnforced
-#tfsec:ignore:AVD-AWS-0089
 resource "aws_s3_bucket" "tfstate_logs" {
   bucket = "${local.name_prefix}-tfstate-logs"
   tags   = local.tags
@@ -116,8 +114,17 @@ resource "aws_s3_bucket" "tfstate_logs" {
 resource "aws_s3_bucket_ownership_controls" "tfstate_logs" {
   bucket = aws_s3_bucket.tfstate_logs.id
   rule {
-    object_ownership = "BucketOwnerEnforced"
+    object_ownership = "BucketOwnerPreferred"
   }
+}
+
+resource "aws_s3_bucket_acl" "tfstate_logs" {
+  bucket = aws_s3_bucket.tfstate_logs.id
+  acl    = "log-delivery-write"
+
+  depends_on = [
+    aws_s3_bucket_ownership_controls.tfstate_logs
+  ]
 }
 
 resource "aws_s3_bucket_public_access_block" "tfstate_logs" {
