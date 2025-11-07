@@ -56,6 +56,19 @@
 
 ---
 
+## 2025-11-07 — feat/poc-01b-backend-wiring
+
+### What I did — PoC 1B (backend wiring)
+
+- Added `backend.hcl.example` + README to wire future stacks to remote state (S3/DDB/KMS).
+- Gitignored local `backend.hcl`.
+
+### Why (impact / ROI / SRE) — PoC 1B
+
+- Consistent remote state across stacks, no secrets committed, faster onboarding.
+
+---
+
 ## YYYY-MM-DD — `<branch>` — Template
 
 ### What I did (template)

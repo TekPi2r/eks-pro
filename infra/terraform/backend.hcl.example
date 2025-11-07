@@ -1,0 +1,13 @@
+#############################################
+# Backend config template for remote state
+# - Copy to: infra/terraform/backend.hcl (local only, gitignored)
+# - Fill values using outputs from PoC 1A (bootstrap-state)
+# - Use a distinct "key" per stack (ex: vpc/, ecr/, eks/, rds/)
+#############################################
+
+bucket         = "<eks-pro-dev-tfstate-bucket-name>"
+key            = "<stack-name>/terraform.tfstate"   # e.g., "vpc/terraform.tfstate"
+region         = "eu-west-3"
+dynamodb_table = "<eks-pro-dev-tf-lock-table-name>"
+kms_key_id     = "<kms-key-arn>"
+encrypt        = true
