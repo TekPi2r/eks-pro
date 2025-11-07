@@ -6,6 +6,7 @@
 # - Minimal IAM policy for using this state/lock (attach later)
 #############################################
 
+# Naming and tagging helpers so every resource inherits the same prefix and metadata.
 locals {
   name_prefix = "${var.project}-${var.env}"
 
@@ -25,6 +26,7 @@ locals {
 # KMS — Customer Managed Key for S3 & DynamoDB
 #############################################
 
+# One CMK powers both the state bucket encryption and the DynamoDB table SSE/PITR.
 resource "aws_kms_key" "tfstate" {
   description             = "CMK for Terraform state bucket and DynamoDB lock"
   enable_key_rotation     = true
@@ -41,6 +43,7 @@ resource "aws_kms_alias" "tfstate" {
 # S3 — State bucket (versioned, private, KMS CMK)
 #############################################
 
+# Primary Terraform state bucket; remains intentionally empty until modules store state.
 resource "aws_s3_bucket" "tfstate" {
   bucket = local.bucket_name
   tags   = local.tags
@@ -83,6 +86,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "tfstate" {
 }
 
 # Optional: lifecycle for non-current versions
+# Down-tier and expire non-current object versions to control storage growth over time.
 resource "aws_s3_bucket_lifecycle_configuration" "tfstate" {
   bucket = aws_s3_bucket.tfstate.id
 
@@ -118,6 +122,7 @@ resource "aws_s3_bucket_ownership_controls" "tfstate_logs" {
   }
 }
 
+# ACLs must remain enabled on the logging bucket so AWS can push access logs into it.
 resource "aws_s3_bucket_acl" "tfstate_logs" {
   bucket = aws_s3_bucket.tfstate_logs.id
   acl    = "log-delivery-write"
@@ -163,6 +168,7 @@ resource "aws_s3_bucket_logging" "tfstate" {
 # DynamoDB — Lock table (PITR + KMS CMK)
 #############################################
 
+# DynamoDB table acts as the Terraform state lock; PITR + SSE harden against corruption.
 resource "aws_dynamodb_table" "tf_lock" {
   name         = local.lock_table
   billing_mode = "PAY_PER_REQUEST"
@@ -190,6 +196,7 @@ resource "aws_dynamodb_table" "tf_lock" {
 # IAM — Minimal RW policy for this state & lock (attach later)
 #############################################
 
+# Policy assembled here can be attached to IAM principals that need to interact with the state backend.
 data "aws_iam_policy_document" "tfstate_rw" {
   statement {
     sid    = "S3StateBucket"
