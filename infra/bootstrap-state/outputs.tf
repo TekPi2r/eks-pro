@@ -17,3 +17,18 @@ output "tfstate_rw_policy_arn" {
   value       = aws_iam_policy.tfstate_rw.arn
   description = "IAM policy ARN granting minimal RW on tfstate and lock."
 }
+
+output "lock_table_arn" {
+  description = "Lock table ARN (DynamoDB)"
+  value       = aws_dynamodb_table.tf_lock.arn
+}
+
+output "kms_key_alias" {
+  description = "Alias of the CMK"
+  value       = aws_kms_alias.tfstate.name
+}
+
+output "kms_key_arn" {
+  description = "ARN of the CMK used for tfstate and DDB lock"
+  value       = aws_kms_key.tfstate.arn
+}

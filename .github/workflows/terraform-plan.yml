@@ -1,0 +1,30 @@
+name: terraform-plan
+
+on:
+  pull_request:
+    paths:
+      - "infra/terraform/**"
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: "Stack path under infra/terraform (e.g., iam-oidc)"
+        required: true
+        type: string
+
+jobs:
+  plan-changed:
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: ./.github/workflows/_tf-reusable.yml
+    with:
+      action: plan
+      # naïve detector: take first changed stack folder
+      stack: ${{ fromJSON( format('["{0}"]', join( github.event.pull_request.head.sha, '' ) ) )[0] }}
+    secrets: inherit
+
+  plan-manual:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    uses: ./.github/workflows/_tf-reusable.yml
+    with:
+      action: plan
+      stack: ${{ inputs.stack }}
+    secrets: inherit
