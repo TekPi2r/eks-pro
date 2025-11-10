@@ -75,9 +75,10 @@ AWS_PROFILE=eks-pro-platform terraform apply \
 
 ## Outputs to capture
 
-- `s3_bucket_name`, `s3_bucket_arn`
-- `dynamodb_table_name`, `dynamodb_table_arn`
-- `kms_key_arn`
+- `tfstate_bucket_name`, `tfstate_bucket_arn`
+- `lock_table_name`, `lock_table_arn`
+- `kms_key_alias`, `kms_key_arn`
+- `tfstate_rw_policy_arn`
 
 ## Cost note
 
