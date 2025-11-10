@@ -11,10 +11,14 @@ on:
         required: true
         type: string
 
+permissions:
+  id-token: write # nécessaire pour OIDC (assume role)
+  contents: read # suffisant pour checkout/lecture
+
 jobs:
   plan-changed:
     if: ${{ github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/_tf-reusable.yml
+    uses: TekPi2r/eks-pro/.github/workflows/_tf-reusable.yml@03f4c8029ed090f3b4ad9976bcf4b19fd52e1052
     with:
       action: plan
       # naïve detector: take first changed stack folder
@@ -23,7 +27,7 @@ jobs:
 
   plan-manual:
     if: ${{ github.event_name == 'workflow_dispatch' }}
-    uses: ./.github/workflows/_tf-reusable.yml
+    uses: TekPi2r/eks-pro/.github/workflows/_tf-reusable.yml@03f4c8029ed090f3b4ad9976bcf4b19fd52e1052
     with:
       action: plan
       stack: ${{ inputs.stack }}
