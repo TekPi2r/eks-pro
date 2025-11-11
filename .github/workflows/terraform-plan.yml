@@ -1,34 +1,47 @@
+---
 name: terraform-plan
 
 on:
   pull_request:
     paths:
       - "infra/terraform/**"
-  workflow_dispatch:
-    inputs:
-      stack:
-        description: "Stack path under infra/terraform (e.g., iam-oidc)"
-        required: true
-        type: string
+      - ".github/workflows/terraform-plan.yml"
 
 permissions:
-  id-token: write # nécessaire pour OIDC (assume role)
-  contents: read # suffisant pour checkout/lecture
+  id-token: write
+  contents: read
+
+concurrency:
+  group: terraform-plan-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  plan-changed:
-    if: ${{ github.event_name == 'pull_request' }}
-    uses: TekPi2r/eks-pro/.github/workflows/_tf-reusable.yml@03f4c8029ed090f3b4ad9976bcf4b19fd52e1052
-    with:
-      action: plan
-      # naïve detector: take first changed stack folder
-      stack: ${{ fromJSON( format('["{0}"]', join( github.event.pull_request.head.sha, '' ) ) )[0] }}
-    secrets: inherit
+  plan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - uses: actions/checkout@v4
 
-  plan-manual:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
-    uses: TekPi2r/eks-pro/.github/workflows/_tf-reusable.yml@03f4c8029ed090f3b4ad9976bcf4b19fd52e1052
-    with:
-      action: plan
-      stack: ${{ inputs.stack }}
-    secrets: inherit
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TF_PLAN_DEV }}
+          role-session-name: gha-terraform-plan
+          aws-region: eu-west-3
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Terraform Init
+        run: terraform init -backend-config=backend.hcl
+
+      - name: Terraform Fmt
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -no-color
