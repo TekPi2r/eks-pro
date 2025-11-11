@@ -18,3 +18,6 @@ provider "aws" {
 module "iam_oidc" {
   source = "./iam-oidc"
 }
+
+output "oidc_provider_arn" { value = module.iam_oidc.oidc_provider_arn }
+output "gha_tf_plan_role_arn" { value = module.iam_oidc.gha_tf_plan_role_arn }
