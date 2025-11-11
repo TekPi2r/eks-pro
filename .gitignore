@@ -14,7 +14,7 @@ coverage/
 crash.log
 
 # Terraform - Local backend config (never commit the real one)
-backend.hcl
+# backend.hcl
 
 # Python tools (si scripts)
 __pycache__/
