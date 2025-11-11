@@ -24,9 +24,8 @@ module "gh_oidc_plan" {
   tf_lock_table_arn  = data.aws_dynamodb_table.lock.arn
   tfstate_kms_arn    = data.aws_kms_key.state.arn
 
-  name_prefix = "${local.project}-${local.env}" # garde ton nommage gha_*
+  name_prefix = "${local.project}-${local.env}"
 }
 
-# Garder les mêmes outputs que ton ancien fichier
 output "oidc_provider_arn" { value = module.gh_oidc_plan.oidc_provider_arn }
 output "gha_tf_plan_role_arn" { value = module.gh_oidc_plan.gha_tf_plan_role_arn }
