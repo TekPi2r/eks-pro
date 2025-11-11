@@ -7,7 +7,7 @@ on:
       - ".github/workflows/terraform-plan.yml"
 
 permissions:
-  id-token: write # required for GitHub OIDC
+  id-token: write
   contents: read
 
 concurrency:
@@ -16,17 +16,22 @@ concurrency:
 
 jobs:
   plan:
+    # Secrets d'environnement (optionnel mais propre si tu utilises l'env dev)
+    environment: dev
     runs-on: ubuntu-latest
-    environment: dev # <— Optionnel : utilise l'environnement 'dev' et ses secrets
     defaults:
       run:
         working-directory: infra/terraform
+    # Redonde les permissions OIDC au niveau job (certains linters/contexts l'exigent)
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Guard step to avoid errors when the secret isn't set yet
+      # Guard: skip propre si le secret n'est pas encore défini
       - name: Guard — check AWS_ROLE_TF_PLAN_DEV
         id: guard
         shell: bash
@@ -38,6 +43,16 @@ jobs:
             echo "can_run=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # Debug OIDC: vérifie que l'ID token est disponible (si KO ici → pb de permissions OIDC)
+      - name: Debug — fetch OIDC ID token
+        if: steps.guard.outputs.can_run == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const core = require('@actions/core');
+            const id = await core.getIDToken('sts.amazonaws.com');
+            console.log(`OIDC ID token length: ${id.length}`);
+
       - name: Configure AWS credentials (OIDC → assume role)
         if: steps.guard.outputs.can_run == 'true'
         uses: aws-actions/configure-aws-credentials@v2
@@ -45,6 +60,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TF_PLAN_DEV }}
           role-session-name: gha-terraform-plan
           aws-region: eu-west-3
+          # audience: sts.amazonaws.com   # (défaut)
 
       - name: Setup Terraform
         if: steps.guard.outputs.can_run == 'true'
