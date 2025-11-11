@@ -60,7 +60,9 @@ data "aws_iam_policy_document" "tfstate_rw" {
     sid    = "DDBLock"
     effect = "Allow"
     actions = [
-      "dynamodb:DescribeTable", "dynamodb:GetItem",
+      "dynamodb:DescribeTable",
+      "dynamodb:DescribeContinuousBackups",
+      "dynamodb:GetItem",
       "dynamodb:PutItem", "dynamodb:DeleteItem"
     ]
     resources = [var.tf_lock_table_arn]
@@ -72,6 +74,13 @@ data "aws_iam_policy_document" "tfstate_rw" {
     effect    = "Allow"
     actions   = ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey", "kms:DescribeKey"]
     resources = [var.tfstate_kms_arn]
+  }
+
+  statement {
+    sid       = "OidcRead"
+    effect    = "Allow"
+    actions   = ["iam:GetOpenIDConnectProvider"]
+    resources = [aws_iam_openid_connect_provider.github.arn]
   }
 }
 
