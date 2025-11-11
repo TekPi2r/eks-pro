@@ -7,8 +7,8 @@ module "gh_oidc_plan" {
 
   # ARNs comme dans ton ancien fichier
   tfstate_bucket_arn = "arn:aws:s3:::eks-pro-dev-tfstate"
-  tf_lock_table_arn  = "arn:aws:dynamodb:eu-west-3:<ACCOUNT_ID>:table/eks-pro-dev-tf-lock"
-  tfstate_kms_arn    = "arn:aws:kms:eu-west-3:<ACCOUNT_ID>:key/<CMK_ID>"
+  tf_lock_table_arn  = "arn:aws:dynamodb:eu-west-3:325107200902:table/eks-pro-dev-tf-lock"
+  tfstate_kms_arn    = "arn:aws:kms:eu-west-3:325107200902:key/83b302d6-9684-4228-a33c-04e83d0807b8"
 
   # pour reproduire exactement ton nommage
   name_prefix = "eks-pro-dev"
