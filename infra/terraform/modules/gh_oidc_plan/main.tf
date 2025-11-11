@@ -63,6 +63,7 @@ data "aws_iam_policy_document" "tfstate_rw" {
       "dynamodb:DescribeTable",
       "dynamodb:DescribeContinuousBackups",
       "dynamodb:DescribeTimeToLive",
+      "dynamodb:ListTagsOfResource",
       "dynamodb:GetItem",
       "dynamodb:PutItem", "dynamodb:DeleteItem"
     ]
@@ -82,7 +83,8 @@ data "aws_iam_policy_document" "tfstate_rw" {
     effect = "Allow"
     actions = [
       "iam:GetOpenIDConnectProvider",
-      "iam:GetRole"
+      "iam:GetRole",
+      "iam:ListRolePolicies"
     ]
     resources = [
       aws_iam_openid_connect_provider.github.arn,
