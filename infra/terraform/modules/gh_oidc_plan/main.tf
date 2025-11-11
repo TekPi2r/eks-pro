@@ -62,6 +62,7 @@ data "aws_iam_policy_document" "tfstate_rw" {
     actions = [
       "dynamodb:DescribeTable",
       "dynamodb:DescribeContinuousBackups",
+      "dynamodb:DescribeTimeToLive",
       "dynamodb:GetItem",
       "dynamodb:PutItem", "dynamodb:DeleteItem"
     ]
@@ -77,10 +78,16 @@ data "aws_iam_policy_document" "tfstate_rw" {
   }
 
   statement {
-    sid       = "OidcRead"
-    effect    = "Allow"
-    actions   = ["iam:GetOpenIDConnectProvider"]
-    resources = [aws_iam_openid_connect_provider.github.arn]
+    sid    = "IamRead"
+    effect = "Allow"
+    actions = [
+      "iam:GetOpenIDConnectProvider",
+      "iam:GetRole"
+    ]
+    resources = [
+      aws_iam_openid_connect_provider.github.arn,
+      aws_iam_role.gha_tf_plan.arn
+    ]
   }
 }
 
