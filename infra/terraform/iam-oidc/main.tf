@@ -1,18 +1,30 @@
-module "gh_oidc_plan" {
-  source = "../modules/gh_oidc_plan"
+# Variables/locals communs (si pas déjà présents)
+locals {
+  project = "eks-pro"
+  env     = "dev"
 
-  project        = "eks-pro"
-  env            = "dev"
+  state_bucket_name = "eks-pro-dev-tfstate"       # = backend.hcl bucket
+  lock_table_name   = "eks-pro-dev-tf-lock"       # = backend.hcl dynamodb_table
+  kms_alias_name    = "alias/eks-pro-dev-tfstate" # alias pratique pour la CMK du state
+}
+
+# Résolution des ARNs (évite les placeholders)
+data "aws_s3_bucket" "state" { bucket = local.state_bucket_name }
+data "aws_dynamodb_table" "lock" { name = local.lock_table_name }
+data "aws_kms_key" "state" { key_id = local.kms_alias_name } # ou l’ARN direct si tu préfères
+
+module "gh_oidc_plan" {
+  source         = "../modules/gh_oidc_plan"
+  project        = local.project
+  env            = local.env
   repo_full_name = "TekPi2r/eks-pro"
 
-  # ARNs comme dans ton ancien fichier
-  tfstate_bucket_arn = "arn:aws:s3:::eks-pro-dev-tfstate"
-  tf_lock_table_arn  = "arn:aws:dynamodb:eu-west-3:325107200902:table/eks-pro-dev-tf-lock"
-  tfstate_kms_arn    = "arn:aws:kms:eu-west-3:325107200902:key/83b302d6-9684-4228-a33c-04e83d0807b8"
+  # On passe des ARNs fiables issus des data sources
+  tfstate_bucket_arn = data.aws_s3_bucket.state.arn
+  tf_lock_table_arn  = data.aws_dynamodb_table.lock.arn
+  tfstate_kms_arn    = data.aws_kms_key.state.arn
 
-  # pour reproduire exactement ton nommage
-  name_prefix = "eks-pro-dev"
-  # role_name = "eks-pro-dev-gha-tf-plan" # optionnel, sinon généré à partir de name_prefix
+  name_prefix = "${local.project}-${local.env}" # garde ton nommage gha_*
 }
 
 # Garder les mêmes outputs que ton ancien fichier
