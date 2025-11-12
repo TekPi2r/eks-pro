@@ -145,6 +145,14 @@ data "aws_iam_policy_document" "tfstate_rw" {
     actions   = ["iam:ListRolePolicies"]
     resources = [aws_iam_role.gha_tf_plan.arn]
   }
+
+  # IAM: lister les managed policies attachées au rôle géré (refresh)
+  statement {
+    sid       = "IamListAttachedRolePoliciesSelf"
+    effect    = "Allow"
+    actions   = ["iam:ListAttachedRolePolicies"]
+    resources = [aws_iam_role.gha_tf_plan.arn]
+  }
 }
 
 resource "aws_iam_policy" "tfstate_rw" {
