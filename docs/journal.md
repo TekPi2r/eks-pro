@@ -35,20 +35,20 @@
 
 ## 2025-11-07 — feat/poc-01a-terraform-backend
 
-### What I did — PoC 1A (bootstrap-state)
+### What I did — PoC 1A
 
 - Enabled AWS IAM Identity Center; created user + permission set `PlatformBootstrap` (temp AdminAccess).
 - Configured local SSO profile `eks-pro-platform`.
 - `terraform apply` (S3 tfstate + logs, KMS CMK, DynamoDB lock w/ PITR) → OK.
 - Tested `terraform destroy` then final `apply` → OK.
 
-### Why (impact / ROI / SRE)
+### Why (impact / ROI / SRE) — PoC 1A
 
 - Short-lived creds (MFA) from day 1, no long-lived keys.
 - Versioned, encrypted state + lock table → safer infra changes.
 - Sets the stage for OIDC CI/CD (no secrets) next.
 
-### Evidence — PoC 1A (bootstrap-state)
+### Evidence — PoC 1A
 
 - Profile: `eks-pro-platform` (SSO, eu-west-3)
 - Account: `325107200902`
@@ -58,7 +58,7 @@
 
 ## 2025-11-07 — feat/poc-01b-backend-wiring
 
-### What I did — PoC 1B (backend wiring)
+### What I did — PoC 1B
 
 - Added `backend.hcl.example` + README to wire future stacks to remote state (S3/DDB/KMS).
 - Gitignored local `backend.hcl`.
@@ -66,6 +66,34 @@
 ### Why (impact / ROI / SRE) — PoC 1B
 
 - Consistent remote state across stacks, no secrets committed, faster onboarding.
+
+---
+
+## 2025-11-12 — feat/poc-01c-oidc-plan-ci
+
+### What I did — PoC 1C
+
+- Added Terraform module `iam_oidc` + submodule `gh_oidc_plan` (GitHub → AWS OIDC Provider + IAM Role).
+- Created role **`eks-pro-dev-gha-tf-plan`** with minimal RW on remote state (S3/DDB/KMS) + IAM read for refresh.
+- Configured **GitHub Actions workflow `terraform-plan.yml`** :
+  - OIDC assume-role (no secrets)
+  - Steps: init / fmt / validate / plan with concurrency + guards
+- Local `terraform apply` (via AWS SSO) → state synced and CI plan verified.
+- Plan CI ✅ green (Init → Fmt → Validate → Plan).
+
+### Why (impact / ROI / SRE) — PoC 1C
+
+- Secure, **no long-lived AWS keys** in pipelines (OIDC auth only).
+- **Separation of duties:** Plan in CI, Apply local via SSO until infra stabilizes.
+- Builds foundation for **future CI/CD App and DevSecOps gates** without rework.
+- Demonstrates **production-ready IAM boundaries** for recruiter review / portfolio.
+
+### Evidence — PoC 1C
+
+- `gh-actions-plan.png` → All jobs green in CI.
+- `iam-role-gha-tf-plan.png` → Trust policy + attached policy JSON.
+- `terraform-apply-local.png` → Local apply success (output summary).
+- (OIDC provider visible in AWS Console → `token.actions.githubusercontent.com`)
 
 ---
 
