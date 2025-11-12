@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 locals {
   name_prefix = coalesce(var.name_prefix, "${var.project}-${var.env}")
   role_name   = coalesce(var.role_name, "${local.name_prefix}-gha-tf-plan")
@@ -39,7 +41,7 @@ data "aws_iam_policy_document" "gha_assume_role" {
 
 # --- Minimal policy: Terraform remote state only (S3/DDB/KMS) + tiny IAM read for OIDC ---
 data "aws_iam_policy_document" "tfstate_rw" {
-  # S3: bucket du state (lectures de conf utiles à TF)
+  # S3: bucket du state
   statement {
     sid    = "S3StateBucket"
     effect = "Allow"
@@ -66,7 +68,7 @@ data "aws_iam_policy_document" "tfstate_rw" {
     resources = ["${var.tfstate_bucket_arn}/*"]
   }
 
-  # DynamoDB: table de lock (inclure lectures complémentaires)
+  # DynamoDB: table de lock (+ lectures complémentaires)
   statement {
     sid    = "DDBLock"
     effect = "Allow"
@@ -82,7 +84,7 @@ data "aws_iam_policy_document" "tfstate_rw" {
     resources = [var.tf_lock_table_arn]
   }
 
-  # KMS: chiffrage des objets S3 du backend
+  # KMS: chiffrement des objets du backend S3
   statement {
     sid    = "KMSForState"
     effect = "Allow"
@@ -95,15 +97,31 @@ data "aws_iam_policy_document" "tfstate_rw" {
     resources = [var.tfstate_kms_arn]
   }
 
-  # IAM: lecture du provider OIDC géré par le code (nécessaire au refresh du state)
+  # IAM: lecture du provider OIDC
   statement {
-    sid    = "IamReadOidcProvider"
-    effect = "Allow"
-    actions = [
-      "iam:GetOpenIDConnectProvider"
-    ]
+    sid       = "IamReadOidcProvider"
+    effect    = "Allow"
+    actions   = ["iam:GetOpenIDConnectProvider"]
+    resources = [aws_iam_openid_connect_provider.github.arn]
+  }
+
+  # IAM: lecture du rôle géré par ce module (pour refresh)
+  statement {
+    sid       = "IamReadRoleSelf"
+    effect    = "Allow"
+    actions   = ["iam:GetRole"]
+    resources = [aws_iam_role.gha_tf_plan.arn]
+  }
+
+  # IAM: lecture de la policy gérée par ce module (sans cycle)
+  # On CONSTRUIT l'ARN à partir de l’account_id + du nom connu de la policy,
+  # au lieu de référencer aws_iam_policy.tfstate_rw.arn (qui crée un cycle).
+  statement {
+    sid     = "IamReadPolicySelf"
+    effect  = "Allow"
+    actions = ["iam:GetPolicy"]
     resources = [
-      aws_iam_openid_connect_provider.github.arn
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${local.name_prefix}-gha-tfstate-rw"
     ]
   }
 }
