@@ -124,6 +124,27 @@ data "aws_iam_policy_document" "tfstate_rw" {
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${local.name_prefix}-gha-tfstate-rw"
     ]
   }
+
+  # IAM: lire la version courante de la policy gérée (sans cycle)
+  # on calcule l'ARN à partir de l'account_id + du nom deterministe
+  # Prérequis (déjà présent en haut du module) :
+  # data "aws_caller_identity" "current" {}
+  statement {
+    sid     = "IamReadPolicyVersionSelf"
+    effect  = "Allow"
+    actions = ["iam:GetPolicyVersion"]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${local.name_prefix}-gha-tfstate-rw"
+    ]
+  }
+
+  # IAM: lister d'éventuelles inline policies sur le rôle géré
+  statement {
+    sid       = "IamListRolePoliciesSelf"
+    effect    = "Allow"
+    actions   = ["iam:ListRolePolicies"]
+    resources = [aws_iam_role.gha_tf_plan.arn]
+  }
 }
 
 resource "aws_iam_policy" "tfstate_rw" {
