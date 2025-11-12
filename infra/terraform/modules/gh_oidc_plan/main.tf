@@ -39,57 +39,57 @@ data "aws_iam_policy_document" "gha_assume_role" {
 
 # --- Minimal policy: Terraform remote state only (S3/DDB/KMS) ---
 data "aws_iam_policy_document" "tfstate_rw" {
+  # S3: opérations sur le bucket du state
   statement {
-    sid       = "S3StateBucket"
-    effect    = "Allow"
-    actions   = ["s3:ListBucket", "s3:GetBucketLocation"]
+    sid    = "S3StateBucket"
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket",
+      "s3:GetBucketLocation",
+      "s3:GetBucketVersioning",
+      "s3:GetEncryptionConfiguration"
+    ]
     resources = [var.tfstate_bucket_arn]
   }
 
+  # S3: opérations sur les objets du state
   statement {
     sid    = "S3StateObjects"
     effect = "Allow"
     actions = [
-      "s3:GetObject", "s3:PutObject", "s3:DeleteObject",
-      "s3:GetObjectVersion", "s3:DeleteObjectVersion"
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:GetObjectVersion",
+      "s3:DeleteObjectVersion"
     ]
     resources = ["${var.tfstate_bucket_arn}/*"]
   }
 
+  # DynamoDB: table de lock
   statement {
     sid    = "DDBLock"
     effect = "Allow"
     actions = [
       "dynamodb:DescribeTable",
-      "dynamodb:DescribeContinuousBackups",
-      "dynamodb:DescribeTimeToLive",
-      "dynamodb:ListTagsOfResource",
       "dynamodb:GetItem",
-      "dynamodb:PutItem", "dynamodb:DeleteItem"
+      "dynamodb:PutItem",
+      "dynamodb:DeleteItem"
     ]
     resources = [var.tf_lock_table_arn]
   }
 
-  # S3 objets chiffrés CMK: autoriser encrypt/decrypt pour backend I/O
+  # KMS: chiffrage objets S3 du backend
   statement {
-    sid       = "KMSForState"
-    effect    = "Allow"
-    actions   = ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey", "kms:DescribeKey"]
-    resources = [var.tfstate_kms_arn]
-  }
-
-  statement {
-    sid    = "IamRead"
+    sid    = "KMSForState"
     effect = "Allow"
     actions = [
-      "iam:GetOpenIDConnectProvider",
-      "iam:GetRole",
-      "iam:ListRolePolicies"
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:GenerateDataKey",
+      "kms:DescribeKey"
     ]
-    resources = [
-      aws_iam_openid_connect_provider.github.arn,
-      aws_iam_role.gha_tf_plan.arn
-    ]
+    resources = [var.tfstate_kms_arn]
   }
 }
 
