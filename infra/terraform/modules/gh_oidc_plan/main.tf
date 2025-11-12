@@ -37,9 +37,9 @@ data "aws_iam_policy_document" "gha_assume_role" {
   }
 }
 
-# --- Minimal policy: Terraform remote state only (S3/DDB/KMS) ---
+# --- Minimal policy: Terraform remote state only (S3/DDB/KMS) + tiny IAM read for OIDC ---
 data "aws_iam_policy_document" "tfstate_rw" {
-  # S3: opérations sur le bucket du state
+  # S3: bucket du state (lectures de conf utiles à TF)
   statement {
     sid    = "S3StateBucket"
     effect = "Allow"
@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "tfstate_rw" {
     resources = [var.tfstate_bucket_arn]
   }
 
-  # S3: opérations sur les objets du state
+  # S3: objets du state
   statement {
     sid    = "S3StateObjects"
     effect = "Allow"
@@ -66,12 +66,15 @@ data "aws_iam_policy_document" "tfstate_rw" {
     resources = ["${var.tfstate_bucket_arn}/*"]
   }
 
-  # DynamoDB: table de lock
+  # DynamoDB: table de lock (inclure lectures complémentaires)
   statement {
     sid    = "DDBLock"
     effect = "Allow"
     actions = [
       "dynamodb:DescribeTable",
+      "dynamodb:DescribeContinuousBackups",
+      "dynamodb:DescribeTimeToLive",
+      "dynamodb:ListTagsOfResource",
       "dynamodb:GetItem",
       "dynamodb:PutItem",
       "dynamodb:DeleteItem"
@@ -79,7 +82,7 @@ data "aws_iam_policy_document" "tfstate_rw" {
     resources = [var.tf_lock_table_arn]
   }
 
-  # KMS: chiffrage objets S3 du backend
+  # KMS: chiffrage des objets S3 du backend
   statement {
     sid    = "KMSForState"
     effect = "Allow"
@@ -90,6 +93,18 @@ data "aws_iam_policy_document" "tfstate_rw" {
       "kms:DescribeKey"
     ]
     resources = [var.tfstate_kms_arn]
+  }
+
+  # IAM: lecture du provider OIDC géré par le code (nécessaire au refresh du state)
+  statement {
+    sid    = "IamReadOidcProvider"
+    effect = "Allow"
+    actions = [
+      "iam:GetOpenIDConnectProvider"
+    ]
+    resources = [
+      aws_iam_openid_connect_provider.github.arn
+    ]
   }
 }
 
