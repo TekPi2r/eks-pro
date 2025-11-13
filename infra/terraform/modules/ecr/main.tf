@@ -21,22 +21,22 @@ resource "aws_ecr_lifecycle_policy" "keep_recent" {
     rules = [
       {
         rulePriority = 1,
-        description  = "Keep last ${var.retain_images} images",
-        selection = {
-          tagStatus   = "any",
-          countType   = "imageCountMoreThan",
-          countNumber = var.retain_images
-        },
-        action = { type = "expire" }
-      },
-      {
-        rulePriority = 2,
         description  = "Expire untagged images older than 14 days",
         selection = {
           tagStatus   = "untagged",
           countType   = "sinceImagePushed",
           countUnit   = "days",
           countNumber = 14
+        },
+        action = { type = "expire" }
+      },
+      {
+        rulePriority = 2,
+        description  = "Keep last ${var.retain_images} images",
+        selection = {
+          tagStatus   = "any",
+          countType   = "imageCountMoreThan",
+          countNumber = var.retain_images
         },
         action = { type = "expire" }
       }
