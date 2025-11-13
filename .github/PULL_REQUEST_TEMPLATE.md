@@ -24,9 +24,9 @@
 
 ## SRE notes
 
-- SLO/SLI changed? yes/no
-- Error budget impact? (if applicable)
-- Runbook/postmortem touched? yes/no
+- [ ] SLO/SLI changed?
+- [ ] Error budget impact? (if applicable)
+- [ ] Runbook/postmortem touched?
 
 ## Evidence
 
