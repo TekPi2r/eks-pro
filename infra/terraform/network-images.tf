@@ -10,10 +10,9 @@ module "vpc" {
   env     = local.env
   region  = local.region
 
-  vpc_cidr    = "10.0.0.0/16"
-  az_count    = 3
-  enable_nat  = true                                                           # 1 NAT, cost-optimized (note in journal)
-  kms_key_arn = "arn:aws:kms:eu-west-3:325107200902:alias/eks-pro-dev-tfstate" # Copy from your backend.hcl
+  vpc_cidr   = "10.0.0.0/16"
+  az_count   = 3
+  enable_nat = true # 1 NAT, cost-optimized (note in journal)
 }
 
 module "ecr_app" {

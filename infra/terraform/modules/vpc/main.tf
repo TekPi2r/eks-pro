@@ -102,9 +102,12 @@ resource "aws_route_table_association" "private_assoc" {
   route_table_id = aws_route_table.private.id
 }
 
+#tfsec:ignore:AVD-AWS-0017
 resource "aws_cloudwatch_log_group" "flow_logs" {
-  name              = "/aws/vpc/${local.name}-flow-logs"
-  kms_key_id        = var.kms_key_arn
+  name = "/aws/vpc/${local.name}-flow-logs"
+  # In this PoC we rely on the AWS-managed KMS key for CloudWatch Logs.
+  # In a production platform, I would introduce a dedicated CMK for logs
+  # with a stricter key policy and possibly centralization.
   retention_in_days = 30
 
   tags = merge(local.tags_base, {

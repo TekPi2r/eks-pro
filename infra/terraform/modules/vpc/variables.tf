@@ -14,6 +14,3 @@ variable "enable_nat" {
   type    = bool
   default = true
 } # 1 NAT GW (cost-optimized)
-variable "kms_key_arn" {
-  type = string
-}
