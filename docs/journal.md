@@ -97,6 +97,41 @@
 
 ---
 
+## 2025-11-13 — feat/poc-02-network-images
+
+### What I did — PoC 2 (Network & Images)
+
+- Created VPC module with:
+  - `10.0.0.0/16` CIDR
+  - 3 public + 3 private subnets (eu-west-3a/b/c)
+  - Internet Gateway + 1 NAT Gateway
+  - Public and private route tables
+- Enabled VPC Flow Logs → CloudWatch Logs
+  - Using AWS-managed KMS key for PoC (CMK hardening planned)
+  - 30-day retention
+- Added ECR module:
+  - CMK encryption
+  - Scan-on-push
+  - Lifecycle policy (untagged cleanup, keep last N images)
+- Created root wiring file `network-images.tf`
+
+### Why (ROI / SRE impact)
+
+- Production-like network foundation for future EKS cluster.
+- Flow Logs provide network visibility from day 1 (SRE / SecOps).
+- ECR with CMK + scanning improves supply-chain posture.
+- Balanced PoC complexity: clear baseline now, CMK-hardening later.
+
+### Evidence (Proof Pack)
+
+- CI green (`gh-actions-plan-poc-02.png`)
+- VPC views (overview, subnets, routes)
+- Flow Logs + CloudWatch log group
+- ECR repo + lifecycle policy
+- Local Terraform apply (`terraform-apply-poc-02.png`)
+
+---
+
 ## YYYY-MM-DD — `<branch>` — Template
 
 ### What I did (template)

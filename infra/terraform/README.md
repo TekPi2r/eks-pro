@@ -65,9 +65,30 @@
 - `backend.hcl` contient des secrets ? Non. Il localise le state (OK pour commit).
 - Conflits de state ? Le lock DynamoDB protège les apply. Les plans ne lockent pas.
 
-### 🚀 Suite (PoC 2 → 8)
+---
 
-- **PoC 2 — Network & Images** : VPC (3 AZ, subnets pub/priv, NAT GW) + ECR (scan on push, lifecycle).
+## PoC 2 — Network & Images
+
+- `modules/vpc`
+
+  - VPC 10.0.0.0/16
+  - 3× public + 3× private subnets
+  - Internet Gateway + NAT Gateway
+  - Flow Logs → CloudWatch Logs
+
+- `modules/ecr`
+
+  - ECR repository for application images
+  - KMS CMK encryption
+  - Scan-on-push
+  - Lifecycle policy (retain recent images)
+
+- Wiring file: `network-images.tf`
+
+---
+
+### 🚀 Suite (PoC 3 → 8)
+
 - **PoC 3 — EKS Cluster** : EKS + NodeGroup, IRSA, `aws-auth` RBAC CI.
 - **PoC 4 — App** : Helm chart API (probes, HPA, PDB, anti-affinity) + Ingress ALB.
 - **PoC 5 — Stateful** : RDS Postgres, Redis (StatefulSet + PVC EBS gp3), SecretsMgr via IRSA.

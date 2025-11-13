@@ -181,3 +181,8 @@ resource "aws_iam_role_policy_attachment" "gha_tf_plan_attach" {
   role       = aws_iam_role.gha_tf_plan.name
   policy_arn = aws_iam_policy.tfstate_rw.arn
 }
+
+resource "aws_iam_role_policy_attachment" "gha_tf_plan_readonly" {
+  role       = aws_iam_role.gha_tf_plan.name
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}

@@ -32,8 +32,8 @@ Observability: **Prometheus + Grafana + Loki**, with SRE baselines (SLO/SLI, run
 | 1A  | Bootstrap state  | S3 + KMS + DynamoDB (PITR) via SSO profile                  | ✅ Done |
 | 1B  | Backend wiring   | `backend.hcl` + docs + example                              | ✅ Done |
 | 1C  | OIDC + Plan CI   | IAM OIDC Provider + Role `gha-tf-plan` + plan-only workflow | ✅ Done |
-| 2   | Network & Images | VPC (3 AZ) + ECR repos                                      | 🔜 Next |
-| …   |                  | EKS → App → RDS/Redis → DevSecOps → SRE → Delivery          |         |
+| 2   | Network & Images | VPC (3 AZ, NAT, Flow Logs) + ECR (CMK)                      | ✅ Done |
+| 3   | EKS Cluster      | EKS cluster + Node Group + aws-auth                         | 🔜 Next |
 
 See full progression → [`docs/journal.md`](./docs/journal.md)
 
@@ -55,3 +55,59 @@ terraform plan
 ---
 
 ### Cloud ROI focus: production-grade project demonstrating AWS EKS + DevSecOps practices for a Cloud Engineer /DevOps role
+
+---
+
+### ✔️ PoC 1 — Terraform Backend & GitHub OIDC
+
+This stage establishes the secure Terraform foundation for the whole project.
+
+#### 🔹 Remote Backend (1A)
+
+- Encrypted **S3 bucket** for Terraform state
+- **DynamoDB** state locking
+- **KMS CMK** for state encryption
+- Bootstrapped using AWS SSO short-lived credentials
+
+#### 🔹 Backend Wiring (1B)
+
+- Added `backend.hcl.example` + project-wide backend configuration
+- Ensures all future stacks share the same secure remote state
+
+#### 🔹 GitHub Actions OIDC (1C)
+
+- Created **GitHub OIDC provider**
+- IAM role `eks-pro-dev-gha-tf-plan` for Terraform `plan`
+- Permissions: S3/DDB/KMS state access only (least privilege)
+- CI pipeline now runs Terraform plan with **zero secrets**
+
+#### 📁 Proof Pack - PoC 1
+
+All screenshots available in: `docs/proofs/poc-01/`.
+
+---
+
+### ✔️ PoC 2 — Network & Images
+
+This stage delivers the production-grade network foundation for the future EKS cluster, plus secure image storage.
+
+#### 🔹 Network (VPC)
+
+- **VPC**: `10.0.0.0/16`
+- **Subnets**: 3 public + 3 private across **eu-west-3a / 3b / 3c**
+- **Routing**:
+  - Public → Internet Gateway
+  - Private → 1 × NAT Gateway (cost-optimized)
+- **Flow Logs** → CloudWatch Logs (30-day retention)
+  - Using AWS-managed KMS key (CMK hardening planned for later PoC)
+
+#### 🔹 Container Images (ECR)
+
+- **ECR repository**: `eks-pro-dev-app`
+- **Encryption**: Customer-Managed KMS Key (CMK)
+- **Scan on push**: enabled
+- **Lifecycle policy**: cleanup of old/untagged images
+
+#### 📁 Proof Pack - PoC 2
+
+All screenshots available in: `docs/proofs/poc-02/`.
