@@ -16,7 +16,7 @@
   bucket         = "eks-pro-dev-tfstate"
   key            = "infra.tfstate"        # un seul root => une seule key
   region         = "eu-west-3"
-  dynamodb_table = "eks-pro-dev-tf-lock"
+  use_lockfile   = true   # NEW: native S3 locking (replaces dynamodb_table)
   encrypt        = true
   kms_key_id     = "arn:aws:kms:eu-west-3:<ACCOUNT_ID>:key/<CMK_ID>"
 ```

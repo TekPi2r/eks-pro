@@ -8,7 +8,6 @@ variable "name_prefix" {
 
 # Remote state resources from PoC 1A
 variable "tfstate_bucket_arn" { type = string }
-variable "tf_lock_table_arn" { type = string }
 variable "tfstate_kms_arn" { type = string }
 
 # Override optionnel si tu veux un autre nom de rôle
