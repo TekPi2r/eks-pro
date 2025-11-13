@@ -68,21 +68,22 @@ data "aws_iam_policy_document" "tfstate_rw" {
     resources = ["${var.tfstate_bucket_arn}/*"]
   }
 
+  # Plus utile car use_lockfile now car DDB depracted with terraform
   # DynamoDB: table de lock (+ lectures complémentaires)
-  statement {
-    sid    = "DDBLock"
-    effect = "Allow"
-    actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:DescribeContinuousBackups",
-      "dynamodb:DescribeTimeToLive",
-      "dynamodb:ListTagsOfResource",
-      "dynamodb:GetItem",
-      "dynamodb:PutItem",
-      "dynamodb:DeleteItem"
-    ]
-    resources = [var.tf_lock_table_arn]
-  }
+  # statement {
+  #   sid    = "DDBLock"
+  #   effect = "Allow"
+  #   actions = [
+  #     "dynamodb:DescribeTable",
+  #     "dynamodb:DescribeContinuousBackups",
+  #     "dynamodb:DescribeTimeToLive",
+  #     "dynamodb:ListTagsOfResource",
+  #     "dynamodb:GetItem",
+  #     "dynamodb:PutItem",
+  #     "dynamodb:DeleteItem"
+  #   ]
+  #   resources = [var.tf_lock_table_arn]
+  # }
 
   # KMS: chiffrement des objets du backend S3
   statement {

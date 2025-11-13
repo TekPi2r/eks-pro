@@ -5,9 +5,9 @@
 # - Use a distinct "key" per stack (ex: vpc/, ecr/, eks/, rds/)
 #############################################
 
-bucket         = "<eks-pro-dev-tfstate-bucket-name>"
-key            = "<stack-name>/terraform.tfstate"   # e.g., "vpc/terraform.tfstate"
-region         = "eu-west-3"
-dynamodb_table = "<eks-pro-dev-tf-lock-table-name>"
-kms_key_id     = "<kms-key-arn>"
-encrypt        = true
+bucket       = "<eks-pro-dev-tfstate-bucket-name>"
+key          = "<stack-name>/terraform.tfstate"   # e.g., "vpc/terraform.tfstate"
+region       = "eu-west-3"
+use_lockfile = true   # NEW: native S3 locking (replaces dynamodb_table)
+kms_key_id   = "<kms-key-arn>"
+encrypt      = true
